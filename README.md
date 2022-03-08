@@ -11,6 +11,7 @@ First of all it is necessary to deploy the upstream Assisted Installer in your e
 
 ## Assisted Installer API calls
 
+
 ### Clusters
 
 #### Get OpenShift clusters
