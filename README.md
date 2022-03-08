@@ -1,6 +1,7 @@
 # Assisted Installer - How to guide
 
-> Note: The upstream Assisted Installer is not supported officially by Red Hat, the supported AI is the one provided with RHACM. Use this information at your own risk, the upstream AI may contain new features/changes that may not be reflected in this guide.
+> [!WARNING]
+> > Note: The upstream Assisted Installer is not supported officially by Red Hat, the supported AI is the one provided with RHACM. Use this information at your own risk, the upstream AI may contain new features/changes that may not be reflected in this guide.
 
 
 # Assisted Installer deployment
@@ -8,7 +9,7 @@
 First of all it is necessary to deploy the upstream Assisted Installer in your environment, choose your deployment option based on your preferences and deploy the AI following these [instructions](https://github.com/openshift/assisted-service/tree/4b4f0f45d897430037039a9282225bf6bd02acfe#deployment).
 
 
-#Assisted Installer API calls
+# Assisted Installer API calls
 
 ### Clusters
 
