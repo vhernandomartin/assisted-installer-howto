@@ -1,7 +1,7 @@
 # Assisted Installer - How to guide
 
 > [!WARNING]
-> > Note: The upstream Assisted Installer is not supported officially by Red Hat, the supported AI is the one provided with RHACM. Use this information at your own risk, the upstream AI may contain new features/changes that may not be reflected in this guide.
+> The upstream Assisted Installer is not supported officially by Red Hat, the supported AI is the one provided with RHACM. Use this information at your own risk, the upstream AI may contain new features/changes that may not be reflected in this guide.
 
 
 # Assisted Installer deployment
