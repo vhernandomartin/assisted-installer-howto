@@ -1,0 +1,9 @@
+apiVersion: operator.openshift.io/v1alpha1
+kind: ImageContentSourcePolicy
+metadata:
+  name: disconnected-internal-icsp
+spec:
+  repositoryDigestMirrors:
+  - mirrors:
+    - registry.mydomain.example.com:5000
+    source: registry.redhat.io

@@ -1,0 +1,9 @@
+apiVersion: operator.openshift.io/v1alpha1
+kind: ImageContentSourcePolicy
+metadata:
+  name: image-policy-0
+spec:
+  repositoryDigestMirrors:
+  - mirrors:
+    - registry.mydomain.example.com:5000/rhacm2
+    source: registry.redhat.io/rhacm2
