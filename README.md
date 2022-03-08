@@ -7,6 +7,7 @@
 
 First of all it is necessary to deploy the upstream Assisted Installer in your environment, choose your deployment option based on your preferences and deploy the AI following these [instructions](https://github.com/openshift/assisted-service/tree/4b4f0f45d897430037039a9282225bf6bd02acfe#deployment).
 
+
 ## Assisted Installer API calls
 
 ### Clusters
@@ -86,13 +87,16 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/downloads/files?file_name=worker.ign -H 'accept: application/octet-stream'|jq
 ```
 
+
 ### Install config
+
 
 #### Get Install config
 
 ```
 $ curl -s http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/install-config|jq
 ```
+
 
 #### Update Install config
 
@@ -113,17 +117,20 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters
 
 ### Manifests
 
+
 #### Get manifests
 
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/manifests -H 'accept: application/json'|jq '.'
 ```
 
+
 #### Get manifest content
 
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/manifests/files?folder=openshift\&file_name=50-masters-chrony-configuration.yaml -H 'accept: application/octet-stream'
 ```
+
 
 #### Upload a new manifest
 
@@ -134,13 +141,16 @@ $ curl -s -X POST http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/cluster
     -d '{"folder": "openshift","file_name":"99-disable-operatorhub.yaml","content":"YXBpVmVyc2lvbjogY29uZmlnLm9wZW5zaGlmdC5pby92MQpraW5kOiBPcGVyYXRvckh1YgptZXRhZGF0YToKICBuYW1lOiBjbHVzdGVyCnNwZWM6CiAgZGlzYWJsZUFsbERlZmF1bHRTb3VyY2VzOiB0cnVlCg=="}'
 ```
 
+
 ### OpenShift versions
+
 
 #### Get OpenShift versions
 
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/openshift-versions|jq
 ```
+
 
 #### Get components versions
 
@@ -149,6 +159,7 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/componen
 ```
 
 ### Operators
+
 
 #### Supported operators
 
