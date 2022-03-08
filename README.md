@@ -88,7 +88,7 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/downloads/files?file_name=worker.ign -H 'accept: application/octet-stream'|jq
 ```
 
-### Install config
+### Install config
 
 
 #### Get Install config
