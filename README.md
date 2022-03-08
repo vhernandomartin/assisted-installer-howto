@@ -8,6 +8,7 @@
 First of all it is necessary to deploy the upstream Assisted Installer in your environment, choose your deployment option based on your preferences and deploy the AI following these [instructions](https://github.com/openshift/assisted-service/tree/4b4f0f45d897430037039a9282225bf6bd02acfe#deployment).
 
 
+
 ## Assisted Installer API calls
 
 ### Clusters
