@@ -128,7 +128,7 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/manifests/files?folder=openshift\&file_name=50-masters-chrony-configuration.yaml -H 'accept: application/octet-stream'
 ```
 
-#### Upload a new manifest
+#### Upload new manifest
 
 ```
 $ curl -s -X POST http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/manifests \
