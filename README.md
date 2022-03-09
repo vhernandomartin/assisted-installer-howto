@@ -90,15 +90,13 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters
 
 ### Install config
 
-
-#### Get Install config
+#### Get the install config
 
 ```
 $ curl -s http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/install-config|jq
 ```
 
-
-#### Update Install config
+#### Update the install config
 
 ```
 $ curl -s -X PATCH http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/install-config \
@@ -109,7 +107,7 @@ $ curl -s -X PATCH http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/cluste
 
 ### Kubeconfig
 
-#### Get the Kubeconfig
+#### Get the kubeconfig
 
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/downloads/credentials?file_name=kubeconfig-noingress -H 'accept: application/octet-stream'
@@ -117,8 +115,7 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters
 
 ### Manifests
 
-
-#### Get manifests
+#### Get the manifests
 
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/manifests -H 'accept: application/json'|jq '.'
