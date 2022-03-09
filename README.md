@@ -128,7 +128,6 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/clusters/${YOUR_CLUSTER_ID}/manifests/files?folder=openshift\&file_name=50-masters-chrony-configuration.yaml -H 'accept: application/octet-stream'
 ```
 
-
 #### Upload a new manifest
 
 ```
@@ -138,18 +137,15 @@ $ curl -s -X POST http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/cluster
     -d '{"folder": "openshift","file_name":"99-disable-operatorhub.yaml","content":"YXBpVmVyc2lvbjogY29uZmlnLm9wZW5zaGlmdC5pby92MQpraW5kOiBPcGVyYXRvckh1YgptZXRhZGF0YToKICBuYW1lOiBjbHVzdGVyCnNwZWM6CiAgZGlzYWJsZUFsbERlZmF1bHRTb3VyY2VzOiB0cnVlCg=="}'
 ```
 
+### OpenShift versions
 
-### OpenShift versions
-
-
-#### Get OpenShift versions
+#### Get the OpenShift version
 
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/openshift-versions|jq
 ```
 
-
-#### Get components versions
+#### Get the components versions
 
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/component-versions|jq
@@ -157,8 +153,7 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/componen
 
 ### Operators
 
-
-#### Supported operators
+#### Get the supported operators
 
 ```
 $ curl -s -X GET  http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/supported-operators|jq
