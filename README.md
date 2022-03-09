@@ -100,6 +100,13 @@ There are 3 different sections:
 |                      | cpu_architecture        | CPU architecture, i.e: x86_64                                                                    |
 |                      | cluster_id              | Cluster ID reference from the Cluster object created before the InfraEnv object                  |
 
+### How to run the OCP Installer wrapper script
+
+Once both the paramfile.yaml and the install-config-patch files are in place and containing the required settings, just run the following command and wait for some time until the cluster is deployed.
+
+```
+./ocpinstaller.py -f resources/configs/paramfile.yaml
+```
 
 ## Assisted Installer API calls
 
