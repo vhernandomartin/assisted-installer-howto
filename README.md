@@ -46,6 +46,7 @@ $ curl -s -X DELETE http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/infra
 ```
 
 #### Get Image from InfraEnv
+
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/infra-envs/${YOUR_INFRAENV}/downloads/image-url|jq
 ```
