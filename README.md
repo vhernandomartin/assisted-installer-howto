@@ -255,3 +255,14 @@ $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/componen
 ```
 $ curl -s -X GET  http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/supported-operators|jq
 ```
+
+If you want to have your code checked for pep8 automatically before commiting
+changes, you can just do::
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+From that moment on, every time you run *git commit* it will first check your
+diff for pep8 compliance and refuse to commit if it doesn't pass.
