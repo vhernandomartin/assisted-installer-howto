@@ -15,8 +15,6 @@ First of all it is necessary to deploy the upstream Assisted Installer in your e
 
 > Note: This tool allows to deploy either a SNO or a multi-node compact OpenShift cluster (3 masters + 0 workers) based on your preferences, all the settings must be previously provided in the paramfile.yaml file.
 
-### Files
-
 This is the tree that represents the file distribution within the repo.
 
 ```
@@ -53,9 +51,54 @@ The manifests folder includes some of the custom manifests we may need to includ
 ### Paramfile settings
 
 There are 3 different sections:
-1. ocp_infra_configs: Settings for the underlying infrastructure, like: number of masters, bmc ips, bmc users and passwords, etc.
-2. cluster_configs: OpenShift cluster object settings, like the networking parameters, platform type, architecture, pull_secrets, etc.
-3. infraenv_configs: OpenShift InfraEnv object settings, like the nodes static network config (NMState), ssh_key, OpenShift version, etc.
+1. *ocp_infra_configs*: Settings for the underlying infrastructure, like: number of masters, bmc ips, bmc users and passwords, etc.
+2. *cluster_configs*: OpenShift cluster object settings, like the networking parameters, platform type, architecture, pull_secrets, etc.
+3. *infraenv_configs*: OpenShift InfraEnv object settings, like the nodes static network config (NMState), ssh_key, OpenShift version, etc.
+
+
+|Parameter type        |Parameter                |Description                                                                                       |
+|----------------------|-------------------------|--------------------------------------------------------------------------------------------------|
+| ocp_infra_configs    | num_masters             | Number of masters to deploy                                                                      |
+|                      | bmc_ip                  | Console Ips                                                                                      |
+|                      | bmc_user                | Console user                                                                                     |
+|                      | bmc_password            | Console password                                                                                 |
+|                      | bmc_system_path         | Console system_path, required to set boot options                                                |
+|                      | bmc_insertmedia_path    | Console insermedia_path, required to insert new virtual media device (iso)                       |
+|                      | bmc_ejectmedia_path     | Console ejectmedia_path, required to eject existing virtual media                                |
+|                      | bmc_resetsystem_path    | Console resetsystem_path, required to power off, on, reset the server                            |
+|                      | http_path               | HTTP path to store the RHCOS images required to deploy the OpenShift nodes                       |
+| cluster_configs      | name                    | Name of the cluster                                                                              |
+|                      | kind                    | Type of object, in this case a Cluster                                                           |
+|                      | high_availability_mode  | Full for multi-node cluster, None for SNO                                                        |
+|                      | openshift_version       | OpenShift version to deploy, i,e: 4.9                                                            |
+|                      | ocp_release_image       | OpenShift release image to pull from a internal registry                                         |
+|                      | base_dns_domain         | DNS domain for your cluster                                                                      |
+|                      | cluster_networks        | Cluster networks, IP range used for pods                                                         |
+|                      | service_networks        | Service networks, IP range for internal and user services                                        |
+|                      | machine_networks        | Machine network, IP range for OpenShift nodes, Ingress VIP, API VIP                              |
+|                      | pull_secret             | Your pull secret to pull images from registries                                                  |
+|                      | ssh_public_key          | Your ssh public key to be added in the RHCOS authorized_keys                                     |
+|                      | vip_dhcp_allocation     | Set to true if this a DHCP managed environment, false for static IP settings                     |
+|                      | user_managed_networking | Indicates if the network is managed by the user                                                  |
+|                      | platform                | Indicates the type of platform, set baremetal for multi-node                                     |
+|                      | ingress_vip             | Sets the ingress vip IP, required only for multi-node clusters                                   |
+|                      | api_vip                 | Sets the API vip IP, required only for multi-node clusters                                       |
+|                      | additional_ntp_source   | Sets and additional NTP source                                                                   |
+|                      | hyperthreading          | Enable/Disable hiperthreading                                                                    |
+|                      | network_type            | Sets the SDN CNI plugin, choose between OVNKubernetes and OpenShiftSDN                           |
+|                      | schedulable_masters     | Set to true since in both SNO and multi-node compact cluster there are no workers                |
+|                      | cpu_architecture        | CPU architecture, i.e: x86_64                                                                    |
+| infraenv_configs     | kind                    | Type of object, in this case a InfraEnv                                                          |
+|                      | name                    | Name of the InfraEnv object                                                                      |
+|                      | additional_ntp_sources  | Sets and additional NTP source                                                                   |
+|                      | ssh_authorized_key      | Your ssh public key to be added in the RHCOS authorized_keys                                     |
+|                      | pull_secret             | Your pull secret to pull images from registries                                                  |
+|                      | ignition_config_override| Custom ignition config like the internal registry cert o the registries config for discovery host|
+|                      | static_network_config   | Static network config for nodes, be aware of the format and "\n" required to separate lines      |
+|                      | image_type              | Full-iso to set a full iso image for booting nodes                                               |
+|                      | openshift_version       | OpenShift version to deploy, i,e: 4.9                                                            |
+|                      | cpu_architecture        | CPU architecture, i.e: x86_64                                                                    |
+|                      | cluster_id              | Cluster ID reference from the Cluster object created before the InfraEnv object                  |
 
 
 ## Assisted Installer API calls
