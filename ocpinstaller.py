@@ -11,6 +11,9 @@ import socket
 import time
 import base64
 import logging
+from collections import OrderedDict
+from datetime import datetime
+
 
 logging.basicConfig()
 LOG = logging.getLogger(__name__)
@@ -93,6 +96,7 @@ class Cluster:
     def deploy_cluster(self, clusterconf):
         deployfile = self.deployfile
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters'
+        cluster_id_dict = {}
 
         if clusterconf["high_availability_mode"] == 'None':
             LOG.info("Installing a SNO cluster, high_availability_mode set to: " + clusterconf["high_availability_mode"])
@@ -103,22 +107,46 @@ class Cluster:
             cluster_api_call = requests.post(api_url, data=payload, headers=headers)
 
         cluster_json_api = json.loads(requests.get(api_url).text)
-        cluster_json = cluster_json_api[0]
-        cluster_id = cluster_json['id']
-        LOG.info("Cluster deployed with cluster_id: " + cluster_id)
+        existing_deployments = len(cluster_json_api)
+        for num_deployment in range(existing_deployments):
+            cluster_json = cluster_json_api[num_deployment]
+            cluster_id = cluster_json['id']
+            cluster_creation_time = cluster_json['created_at']
+            cluster_id_dict[cluster_id] = cluster_creation_time
+        ordered_cluster_id = sort_dict_by_creation_date(cluster_id_dict, "%Y-%m-%dT%H:%M:%S.%fZ")
+        cluster_id = list(ordered_cluster_id.keys())[0]
+        created_at = list(ordered_cluster_id.values())[0]
+
+        #new_deployment = existing_deployments - 1
+        #print(new_deployment)
+        #cluster_json = cluster_json_api[new_deployment]
+        #cluster_id = cluster_json['id']
+        LOG.info("Cluster deployed with cluster_id: " + cluster_id + ' , created at: ' + created_at)
         return cluster_id
 
     def deploy_infraEnv(self):
         deployfile = self.deployfile
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/infra-envs'
+        infraenv_id_dict = {}
 
         with open(data, 'rb') as payload:
             infraenv_api_call = requests.post(api_url, data=payload, headers=headers)
 
         infraenv_json_api = json.loads(requests.get(api_url).text)
-        infraenv_json = infraenv_json_api[0]
-        infraenv_id = infraenv_json['id']
-        LOG.info("InfraEnv deployed with infraenv_id: " + infraenv_id)
+        existing_infraenvs = len(infraenv_json_api)
+        for num_infraenv in range(existing_infraenvs):
+            infraenv_json = infraenv_json_api[num_infraenv]
+            infraenv_id = infraenv_json['id']
+            infraenv_creation_time = infraenv_json['created_at']
+            infraenv_id_dict[infraenv_id] = infraenv_creation_time
+        ordered_infraenv_id = sort_dict_by_creation_date(infraenv_id_dict, "%Y-%m-%dT%H:%M:%S.%fZ")
+        infraenv_id = list(ordered_infraenv_id.keys())[0]
+        created_at = list(ordered_infraenv_id.values())[0]
+
+        #new_infraenv = existing_infraenvs -1
+        #infraenv_json = infraenv_json_api[new_infraenv]
+        #infraenv_id = infraenv_json['id']
+        LOG.info("InfraEnv deployed with infraenv_id: " + infraenv_id + ' , created at: ' + created_at)
         return infraenv_id
 
     def get_iso(self, infraenv_id):
@@ -314,6 +342,10 @@ def redfish_launcher(num_masters,bmc_user,bmc_password,bmc_ip,bmc_insertmedia_pa
     else:
         LOG.error(str(num_masters) + " servers to install, it is not a valid value")
         exit(2)
+
+def sort_dict_by_creation_date(dict_data, date_format):
+    ordered_data = OrderedDict(reversed(sorted(dict_data.items(), key=lambda x: datetime.strptime(x[1], date_format))))
+    return ordered_data
 
 def main():
     try:
