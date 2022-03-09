@@ -6,24 +6,28 @@ import sys
 import yaml
 import json
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-import urllib
 import wget
 import socket
 import time
 import base64
 import logging
 
+LOG = logging.getLogger(__name__)
 
-class cluster:
-
-    def __init__(self,file,params,deployfile,cluster_id='null'):
+class Cluster:
+    def __init__(self, file, params, deployfile, cluster_id='null'):
         self.file = file
         self.params = params
         self.cluster_id = cluster_id
         self.deployfile = deployfile
 
-    def getParams(self):
+        LOG.setLevel(logging.INFO)
+        LOG.warning("Suppressing requests library SSL Warnings")
+        requests.packages.urllib3.disable_warnings(
+            requests.packages.urllib3.exceptions.InsecureRequestWarning
+        )
+
+    def get_params(self):
         global num_masters
         global bmc_ip
         global bmc_user
@@ -49,14 +53,17 @@ class cluster:
         data = 'resources/configs/' + str(deployfile)
         clusterid_string = 'cluster_id'
         if clusterid_string in open(file, 'r').read():
-            print('INFO: cluster_id parameter already set in the paramfile.yaml, please remove it before running this program')
+            LOG.info("cluster_id parameter already set in the paramfile.yaml, please remove it before running this program")
+            #print('INFO: cluster_id parameter already set in the paramfile.yaml, please remove it before running this program')
             exit(1)
 
         with open(file, 'a') as param_file:
             if cluster_id == 'null':
-                print('INFO: Getting parameters for cluster deployment')
+                LOG.info("Getting parameters for cluster deployment")
+                #print('INFO: Getting parameters for cluster deployment')
             else:
-                print('INFO: appending the cluster_id parameter cluster_id: ' + cluster_id + ' to the paramfile.yaml')
+                LOG.info("Appending the cluster_id parameter cluster_id: " + cluster_id + " to the paramfile.yaml")
+                #print('INFO: appending the cluster_id parameter cluster_id: ' + cluster_id + ' to the paramfile.yaml')
                 param_file.write('  cluster_id: ' + cluster_id)
 
         with open(file) as param_file:
@@ -79,20 +86,23 @@ class cluster:
             ingress_vip = fileparams['ingress_vip']
         return fileparams
 
-    def insertParams(self,fileparams):
+    def insert_params(self, fileparams):
         deployfile = self.deployfile
-        print('INFO: writting configs into the ' + deployfile + ' file')
+        LOG.info("writting configs into the" + deployfile + "file")
+        #print('INFO: writting configs into the ' + deployfile + ' file')
         with open('resources/configs/' + str(deployfile), 'w') as cluster_config_file:
             json.dump(fileparams, cluster_config_file)
 
-    def deployCluster(self,clusterconf):
+    def deploy_cluster(self, clusterconf):
         deployfile = self.deployfile
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters'
 
         if clusterconf["high_availability_mode"] == 'None':
-            print('INFO: Installing a SNO cluster, high_availability_mode set to: ' + clusterconf["high_availability_mode"])
+            LOG.info("Installing a SNO cluster, high_availability_mode set to: " + clusterconf["high_availability_mode"])
+            #print('INFO: Installing a SNO cluster, high_availability_mode set to: ' + clusterconf["high_availability_mode"])
         elif clusterconf["high_availability_mode"] == 'Full':
-            print('INFO: Installing a Multi node cluster, high_availability_mode set to: ' + clusterconf["high_availability_mode"])
+            LOG.info("Installing a Multi node cluster, high_availability_mode set to: " + clusterconf["high_availability_mode"])
+            #print('INFO: Installing a Multi node cluster, high_availability_mode set to: ' + clusterconf["high_availability_mode"])
 
         with open(data, 'rb') as payload:
             cluster_api_call = requests.post(api_url, data=payload, headers=headers)
@@ -100,10 +110,11 @@ class cluster:
         cluster_json_api = json.loads(requests.get(api_url).text)
         cluster_json = cluster_json_api[0]
         cluster_id = cluster_json['id']
-        print('INFO: Cluster deployed with cluster_id: ' + cluster_id)
+        LOG.info("Cluster deployed with cluster_id: " + cluster_id)
+        #print('INFO: Cluster deployed with cluster_id: ' + cluster_id)
         return cluster_id
 
-    def deployInfraEnv(self):
+    def deploy_infraEnv(self):
         deployfile = self.deployfile
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/infra-envs'
 
@@ -113,10 +124,11 @@ class cluster:
         infraenv_json_api = json.loads(requests.get(api_url).text)
         infraenv_json = infraenv_json_api[0]
         infraenv_id = infraenv_json['id']
-        print('INFO: InfraEnv deployed with infraenv_id: ' + infraenv_id)
+        LOG.info("InfraEnv deployed with infraenv_id: " + infraenv_id)
+        #print('INFO: InfraEnv deployed with infraenv_id: ' + infraenv_id)
         return infraenv_id
 
-    def getIso(self,infraenv_id):
+    def get_iso(self, infraenv_id):
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/infra-envs/' + infraenv_id + '/downloads/image-url'
 
         get_iso_json_api = json.loads(requests.get(api_url).text)
@@ -124,20 +136,23 @@ class cluster:
         iso_name = http_path + '/ocp_ai.iso'
         wget.download(get_iso, iso_name)
 
-    def getClusterStatus(self,cluster_id,status_message):
+    def get_cluster_status(self, cluster_id, status_message):
         get_clusterstatus = 'Not checked yet'
         while get_clusterstatus != status_message:
-            print('INFO: The cluster status is: ' + get_clusterstatus + ' , cluster_id: ' + cluster_id)
-            print('INFO: Waiting for: ' + status_message)
+            LOG.info("The cluster status is: " + get_clusterstatus + " , cluster_id: " + cluster_id)
+            LOG.info("Waiting for: " + status_message)
+            #print('INFO: The cluster status is: ' + get_clusterstatus + ' , cluster_id: ' + cluster_id)
+            #print('INFO: Waiting for: ' + status_message)
             time.sleep(30)
             api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id
             get_clusterstatus_json_api = json.loads(requests.get(api_url).text)
             get_clusterstatus = get_clusterstatus_json_api['status_info']
 
-    def getInfraHostsStatus(self,infraenv_id,num_masters):
+    def get_infra_hosts_status(self, infraenv_id, num_masters):
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/infra-envs/' + infraenv_id + '/hosts'
         while len(json.loads(requests.get(api_url).text)) == 0:
-            print('INFO: Waiting for hosts to be registered')
+            LOG.info("Waiting for hosts to be registered")
+            #print('INFO: Waiting for hosts to be registered')
             time.sleep(30)
         if num_masters > 1:
             for master in range(num_masters):
@@ -146,7 +161,8 @@ class cluster:
                     get_host_status_json_api = json.loads(requests.get(api_url).text)
                     get_host_status_json = get_host_status_json_api[master]
                     master_id = get_host_status_json['id']
-                    print('INFO: The infraenv host ' + master_id + ' status is: ' + get_host_status)
+                    LOG.info("The infraenv host " + master_id + " status is: " + get_host_status)
+                    #print('INFO: The infraenv host ' + master_id + ' status is: ' + get_host_status)
                     get_host_status = get_host_status_json['status_info']
                     time.sleep(10)
         elif num_masters == 1:
@@ -155,22 +171,25 @@ class cluster:
                 get_host_status_json_api = json.loads(requests.get(api_url).text)
                 get_host_status_json = get_host_status_json_api[0]
                 master_id = get_host_status_json['id']
-                print('INFO: The infraenv host ' + master_id + ' status is: ' + get_host_status)
+                LOG.info("The infraenv host " + master_id + " status is: " + get_host_status)
+                #print('INFO: The infraenv host ' + master_id + ' status is: ' + get_host_status)
                 get_host_status = get_host_status_json['status_info']
                 time.sleep(10)
         else:
-            print('ERROR: ' + str(num_masters) + ' servers to install, it is not a valid value')
+            LOG.error(str(num_masters) + " servers to install, it is not a valid value")
+            #print('ERROR: ' + str(num_masters) + ' servers to install, it is not a valid value')
             exit(2)
 
 
-    def uploadManifests(self,cluster_id):
+    def upload_manifests(self, cluster_id):
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/manifests'
         headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
         path = 'resources/manifests'
         for manifest in os.listdir(path):
             file = os.path.join(path, manifest)
             if os.path.isfile(file):
-                print('INFO: Adding new manifest: ' + file)
+                LOG.info("Adding new manifest: " + file)
+                #print('INFO: Adding new manifest: ' + file)
                 with open(file, 'rb') as manifest_file:
                     data = manifest_file.read()
                     encoded = base64.b64encode(data)
@@ -181,38 +200,39 @@ class cluster:
                     upload_manifest_api_call = requests.post(api_url, data=data, headers=headers)
         get_manifests_json_api = json.loads(requests.get(api_url).text)
         num_manifests = len(get_manifests_json_api)
-        print('INFO: These are the manifests will be deployed with OpenShift:\n')
+        LOG.info("These are the manifests will be deployed with OpenShift:\n")
+        #print('INFO: These are the manifests will be deployed with OpenShift:\n')
         for deployed_manifest in range(num_manifests):
             get_manifests_json = get_manifests_json_api[deployed_manifest]
             print(get_manifests_json['file_name'])
 
-    def patchClusterConfig(self,cluster_id,api_vip,num_masters):
+    def patch_cluster_config(self, cluster_id, api_vip, num_masters):
         if num_masters > 1:
             data = '{ "api_vip": "' + api_vip + '"}'
             api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id
             headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
             requests.patch(api_url, data=data, headers=headers)
 
-    def patchInstallConfig(self,cluster_id):
+    def patch_install_config(self, cluster_id):
         data = 'resources/configs/install-config-patch'
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/install-config'
         headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
         with open(data, 'rb') as payload:
             infraenv_api_call = requests.patch(api_url, data=payload, headers=headers)
 
-    def installCluster(self,cluster_id):
+    def install_cluster(self, cluster_id):
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/actions/install'
         requests.post(api_url)
 
-    def finishInstallation(self,cluster_id):
+    def finish_installation(self, cluster_id):
         api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/actions/complete-installation'
         headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
         data = '{"is_success":true}'
         requests.post(api_url, data=data, headers=headers)
 
 
-class redFish:
-    def __init__(self,bmc_user,bmc_password,bmc_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip):
+class Redfish:
+    def __init__(self, bmc_user, bmc_password, bmc_ip, bmc_insertmedia_path, bmc_ejectmedia_path, bmc_resetsystem_path, bmc_system_path, hostname, ip):
         self.bmc_user = bmc_user
         self.bmc_password = bmc_password
         self.bmc_ip = bmc_ip
@@ -223,7 +243,13 @@ class redFish:
         self.hostname = hostname
         self.ip = ip
 
-    def insertVirtualMedia(self):
+        LOG.setLevel(logging.INFO)
+        LOG.warning("Suppressing requests library SSL Warnings")
+        requests.packages.urllib3.disable_warnings(
+            requests.packages.urllib3.exceptions.InsecureRequestWarning
+        )
+
+    def insert_virtual_media(self):
         iso_path = 'http://' + str(self.ip) + '/ocp_ai.iso'
         api_url = 'https://'+ str(self.bmc_ip) + self.bmc_insertmedia_path
         api_url2 = 'https://'+ str(self.bmc_ip) + self.bmc_system_path
@@ -231,130 +257,141 @@ class redFish:
         data = '{"Image": "'+ iso_path +'", "Inserted": true}'
         data2 = '{"Boot": {"BootSourceOverrideTarget": "Cd", "BootSourceOverrideMode": "UEFI", "BootSourceOverrideEnabled": "Once"}}'
 
-        print('INFO: Setting the iso image as the virtualmedia device for server: ' + self.bmc_ip)
+        LOG.info("Setting the iso image as the virtualmedia device for server: " + self.bmc_ip)
+        #print('INFO: Setting the iso image as the virtualmedia device for server: ' + self.bmc_ip)
         insert_iso = requests.post(api_url, data=data, headers=headers, verify=False, auth=(self.bmc_user, self.bmc_password))
         time.sleep(10)
         set_insert_iso = requests.patch(api_url2, data=data2, headers=headers, verify=False, auth=(self.bmc_user, self.bmc_password))
         time.sleep(10)
         return insert_iso, set_insert_iso
 
-    def ejectVirtualMedia(self):
+    def eject_virtual_media(self):
         iso_path = 'http://' + str(self.hostname) + '/ocp_ai.iso'
         api_url = 'https://'+ str(self.bmc_ip) + self.bmc_ejectmedia_path
         headers = {'Content-Type': 'application/json'}
         data = '{}'
 
-        print('INFO: Ejecting any iso image as a virtualmedia device for server: ' + self.bmc_ip)
+        LOG.info("Ejecting any iso image as a virtualmedia device for server: " + self.bmc_ip)
+        #print('INFO: Ejecting any iso image as a virtualmedia device for server: ' + self.bmc_ip)
         eject_iso = requests.post(api_url, data=data, headers=headers, verify=False, auth=(self.bmc_user, self.bmc_password))
         time.sleep(10)
         return eject_iso
 
-    def powerOn(self):
+    def power_on(self):
         api_url = 'https://'+ str(self.bmc_ip) + self.bmc_resetsystem_path
         headers = {'Content-Type': 'application/json'}
         data = '{"ResetType": "On"}'
 
-        print('INFO: Powering on the server: ' + str(self.bmc_ip))
+        LOG.info("Powering on the server: " + str(self.bmc_ip))
+        #print('INFO: Powering on the server: ' + str(self.bmc_ip))
         poweron_system = requests.post(api_url, data=data, headers=headers, verify=False, auth=(self.bmc_user, self.bmc_password))
         return poweron_system
 
-    def powerOff(self):
+    def power_off(self):
         api_url = 'https://'+ str(self.bmc_ip) + self.bmc_resetsystem_path
         headers = {'Content-Type': 'application/json'}
         data = '{"ResetType": "ForceOff"}'
 
-        print('INFO: Shutting down the server: ' + str(self.bmc_ip))
+        LOG.info("Shutting down the server: " + str(self.bmc_ip))
+        #print('INFO: Shutting down the server: ' + str(self.bmc_ip))
         poweroff_system = requests.post(api_url, data=data, headers=headers, verify=False, auth=(self.bmc_user, self.bmc_password))
         time.sleep(10)
         return poweroff_system
 
-    def forceRestart(self):
+    def force_restart(self):
         api_url = 'https://'+ str(self.bmc_ip) + self.bmc_resetsystem_path
         headers = {'Content-Type': 'application/json'}
         data = {'ResetType': 'ForceRestart'}
 
-        print('INFO: Restarting the server: ' + str(self.bmc_ip))
+        LOG.info("Restarting the server: " + str(self.bmc_ip))
+        #print('INFO: Restarting the server: ' + str(self.bmc_ip))
         reset_system = requests.post(api_url, data=data, headers=headers, verify=False, auth=(self.bmc_user, self.bmc_password))
         return reset_system
 
-def helpMenu():
-    print('Usage: ' + sys.argv[0] + ' -f <PARAMETERS_FILE>')
+def help_menu():
+    LOG.info("Usage: " + sys.argv[0] + " -f <PARAMETERS_FILE>")
+    #print('Usage: ' + sys.argv[0] + ' -f <PARAMETERS_FILE>')
 
-def redFishLauncher(num_masters,bmc_user,bmc_password,bmc_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip):
+def redfish_launcher(num_masters,bmc_user,bmc_password,bmc_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip):
     if num_masters > 1:
-        print('\nINFO: This is a multi-node installation, it will be required to set VirtualMedia in ' + str(num_masters) + ' servers')
-        print('------------------------------------------------------------------------------------------------------------------------')
+        LOG.info("This is a multi-node installation, it will be required to set VirtualMedia in " + str(num_masters) + "servers")
+        #print('\nINFO: This is a multi-node installation, it will be required to set VirtualMedia in ' + str(num_masters) + ' servers')
+        #print('------------------------------------------------------------------------------------------------------------------------')
         for masterip in bmc_ip:
             console_ip = masterip
-            bmc_ops = redFish(bmc_user,bmc_password,console_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip)
-            bmc_ops.powerOff()
-            bmc_ops.ejectVirtualMedia()
-            bmc_ops.insertVirtualMedia()
-            bmc_ops.powerOn()
-            print('------------------------------------------------------------------------------------------------------------------------')
+            bmc_ops = Redfish(bmc_user,bmc_password,console_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip)
+            bmc_ops.power_off()
+            bmc_ops.eject_virtual_media()
+            bmc_ops.insert_virtual_media()
+            bmc_ops.power_on()
+            #print('------------------------------------------------------------------------------------------------------------------------')
 
     elif num_masters == 1:
-        print('\nINFO: This is a SNO installation, it will be required to set VirtualMedia in ' + str(num_masters) + ' servers')
-        print('------------------------------------------------------------------------------------------------------------------------')
+        LOG.info("This is a SNO installation, it will be required to set VirtualMedia in " + str(num_masters) + "servers")
+        #print('\nINFO: This is a SNO installation, it will be required to set VirtualMedia in ' + str(num_masters) + ' servers')
+        #print('------------------------------------------------------------------------------------------------------------------------')
         bmc_ip = bmc_ip[0]
-        bmc_ops = redFish(bmc_user,bmc_password,bmc_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip)
-        bmc_ops.powerOff()
-        bmc_ops.ejectVirtualMedia()
-        bmc_ops.insertVirtualMedia()
-        bmc_ops.powerOn()
-        print('------------------------------------------------------------------------------------------------------------------------')
+        bmc_ops = Redfish(bmc_user,bmc_password,bmc_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip)
+        bmc_ops.power_off()
+        bmc_ops.eject_virtual_media()
+        bmc_ops.insert_virtual_media()
+        bmc_ops.power_on()
+        #print('------------------------------------------------------------------------------------------------------------------------')
     else:
-        print('ERROR: ' + str(num_masters) + ' servers to install, it is not a valid value')
+        LOG.error(str(num_masters) + " servers to install, it is not a valid value")
+        #print('ERROR: ' + str(num_masters) + ' servers to install, it is not a valid value')
         exit(2)
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hf:", ["help", "file="])
         if not opts:
-            print('No options provided!')
-            helpMenu()
+            LOG.eror("No options provided")
+            #print('No options provided!')
+            help_menu()
             sys.exit(1)
     except getopt.GetoptError as err:
         print(err)
-        helpMenu()
+        help_menu()
         sys.exit(2)
     for opt, arg in opts:
         if len(opts) < 1:
-            print('ERROR: Missing required arguments!')
-            helpMenu()
+            LOG.error("Missing required arguments!")
+            #print('ERROR: Missing required arguments!')
+            help_menu()
             sys.exit(2)
         if opt in ("-h", "--help"):
-            helpMenu()
+            help_menu()
             sys.exit(2)
         elif opt in ("-f", "--file"):
             file = arg
 
-            requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-            ocpinfraconf = cluster(file,"ocp_infra_configs","cluster.json")
-            getocpinfraconf = ocpinfraconf.getParams()
+            #requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+            ocpinfraconf = Cluster(file,"ocp_infra_configs","cluster.json")
+            getocpinfraconf = ocpinfraconf.get_params()
 
-            clusterconf = cluster(file,"cluster_configs","cluster.json")
-            getclusterconf = clusterconf.getParams()
-            insertclusterconf = clusterconf.insertParams(getclusterconf)
-            cluster_id = clusterconf.deployCluster(getclusterconf)
+            clusterconf = Cluster(file,"cluster_configs","cluster.json")
+            getclusterconf = clusterconf.get_params()
+            insertclusterconf = clusterconf.insert_params(getclusterconf)
+            cluster_id = clusterconf.deploy_cluster(getclusterconf)
 
-            infraconf = cluster(file,"infraenv_configs","infraenv.json",cluster_id)
-            getinfraconf = infraconf.getParams()
-            insertinfraconf = infraconf.insertParams(getinfraconf)
-            infraenv_id = infraconf.deployInfraEnv()
-            infraconf.getIso(infraenv_id)
+            infraconf = Cluster(file,"infraenv_configs","infraenv.json",cluster_id)
+            getinfraconf = infraconf.get_params()
+            insertinfraconf = infraconf.insert_params(getinfraconf)
+            infraenv_id = infraconf.deploy_infraEnv()
+            infraconf.get_iso(infraenv_id)
 
-            redFishLauncher(num_masters,bmc_user,bmc_password,bmc_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip)
-            infraconf.getInfraHostsStatus(infraenv_id,num_masters)
-            clusterconf.patchClusterConfig(cluster_id,api_vip,num_masters)
-            clusterconf.getClusterStatus(cluster_id,"Cluster ready to be installed")
+            redfish_launcher(num_masters,bmc_user,bmc_password,bmc_ip,bmc_insertmedia_path,bmc_ejectmedia_path,bmc_resetsystem_path,bmc_system_path,hostname,ip)
+            infraconf.get_infra_hosts_status(infraenv_id,num_masters)
+            clusterconf.patch_cluster_config(cluster_id,api_vip,num_masters)
+            clusterconf.get_cluster_status(cluster_id,"Cluster ready to be installed")
 
-            clusterconf.patchInstallConfig(cluster_id)
-            clusterconf.uploadManifests(cluster_id)
-            clusterconf.installCluster(cluster_id)
+            clusterconf.patch_install_config(cluster_id)
+            clusterconf.upload_manifests(cluster_id)
+            clusterconf.install_cluster(cluster_id)
 
-            clusterconf.getClusterStatus(cluster_id,"Cluster is installed")
-            clusterconf.finishInstallation(cluster_id)
+            clusterconf.get_cluster_status(cluster_id,"Cluster is installed")
+            clusterconf.finish_installation(cluster_id)
 
 
 ## MAIN ##
