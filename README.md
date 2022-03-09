@@ -139,8 +139,6 @@ $ curl -s -X POST http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/cluster
 
 ### OpenShift versions
 
-#### Get the OpenShift version
-
 ```
 $ curl -s -X GET http://${YOUR_AI_ADDRESS}:8090/api/assisted-install/v2/openshift-versions|jq
 ```
