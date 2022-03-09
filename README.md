@@ -10,11 +10,57 @@ First of all it is necessary to deploy the upstream Assisted Installer in your e
 
 ## Assisted Installer wrapper script
 
-> :caution:
+> :warning:
 > This tool is not supported by Red Hat, this has been prepared for testing, standarization and automation purposes within internal labs.
+
+> Note: This tool allows to deploy either a SNO or a multi-node compact OpenShift cluster (3 masters + 0 workers) based on your preferences, all the settings must be previously provided in the paramfile.yaml file.
+
+### Files
+
+This is the tree that represents the file distribution within the repo.
+
+```
+tree
+.
+├── README.md
+├── ocpinstaller.py
+└── resources
+    ├── configs
+    │   ├── install-config-patch-3masters
+    │   ├── install-config-patch-sno
+    │   ├── paramfile-3masters.yaml
+    │   └── paramfile-sno.yaml
+    └── manifests
+        ├── 99-disable-operatorhub.yaml
+        ├── 99-disconnected-internal-icsp.yaml
+        ├── 99-image-policy-0.yaml
+        ├── 99-image-policy-1.yaml
+        ├── 99-image-policy-2.yaml
+        ├── 99-openshift-master-chrony.yaml
+        ├── 99-openshift-worker-chrony.yaml
+        ├── 99-redhat-operator-index-catalog.yaml
+        └── 99-redhat-operators-catalog.yaml
+```
+
+### Pre-requisites
+
+First of all it is necessary to create a `paramfile.yaml` file based on your preferences, settings will vary between a SNO and a multi-node cluster, you can make a copy from either `paramfile-3masters.yaml` or `paramfile-sno.yaml` files to your own `paramfile.yaml` and customize it afterwards based on your own preferences. Check the next section *paramfile settings* for further references on the settings included.
+
+Once the `paramfile.yaml` file is ready, create your own `install-config-patch` file, you can create a copy from one of the `install-config-patch-*` files available in the repo.
+
+The manifests folder includes some of the custom manifests we may need to include in the OpenShift cluster at installation time, set any of these manifests accordingly (internal registry names are required) and place new manifests if you consider it necessary.
+
+### Paramfile settings
+
+There are 3 different sections:
+1. ocp_infra_configs: Settings for the underlying infrastructure, like: number of masters, bmc ips, bmc users and passwords, etc.
+2. cluster_configs: OpenShift cluster object settings, like the networking parameters, platform type, architecture, pull_secrets, etc.
+3. infraenv_configs: OpenShift InfraEnv object settings, like the nodes static network config (NMState), ssh_key, OpenShift version, etc.
 
 
 ## Assisted Installer API calls
+
+In this section you will find some of the Assisted Installer API calls available to interact with the AI.
 
 ### Clusters
 
