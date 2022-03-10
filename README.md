@@ -120,9 +120,18 @@ There are 3 different sections:
 
 Once both the paramfile.yaml and the install-config-patch files are in place and containing the required settings, just run the following command and wait for some time until the cluster is deployed.
 
+#### Using tox virtual environment
+```
+$ tox -e pep8
+$ source .tox/pep8/bin/activate
+(pep8) $ ocpinstaller -f resources/configs/paramfile.yaml
+```
+
+#### From cli using your preferred shell
 ```
 ./ocpinstaller.py -f resources/configs/paramfile.yaml
 ```
+
 
 ## Assisted Installer API calls
 
