@@ -20,24 +20,30 @@ This is the tree that represents the file distribution within the repo.
 ```
 tree
 .
-├── README.md
-├── ocpinstaller.py
-└── resources
-    ├── configs
-    │   ├── install-config-patch-3masters
-    │   ├── install-config-patch-sno
-    │   ├── paramfile-3masters.yaml
-    │   └── paramfile-sno.yaml
-    └── manifests
-        ├── 99-disable-operatorhub.yaml
-        ├── 99-disconnected-internal-icsp.yaml
-        ├── 99-image-policy-0.yaml
-        ├── 99-image-policy-1.yaml
-        ├── 99-image-policy-2.yaml
-        ├── 99-openshift-master-chrony.yaml
-        ├── 99-openshift-worker-chrony.yaml
-        ├── 99-redhat-operator-index-catalog.yaml
-        └── 99-redhat-operators-catalog.yaml
+|-- README.md
+|-- ocpinstaller
+|   `-- ocpinstaller.py
+|-- requirements.txt
+|-- resources
+|   |-- configs
+|   |   |-- install-config-patch-3masters
+|   |   |-- install-config-patch-sno
+|   |   |-- paramfile-3masters.yaml
+|   |   |-- paramfile-sno.yaml
+|   `-- manifests
+|       |-- 99-disable-operatorhub.yaml
+|       |-- 99-disconnected-internal-icsp.yaml
+|       |-- 99-image-policy-0.yaml
+|       |-- 99-image-policy-1.yaml
+|       |-- 99-image-policy-2.yaml
+|       |-- 99-openshift-master-chrony.yaml
+|       |-- 99-openshift-worker-chrony.yaml
+|       |-- 99-redhat-operator-index-catalog.yaml
+|       `-- 99-redhat-operators-catalog.yaml
+|-- setup.cfg
+|-- setup.py
+|-- test-requirements.txt
+`-- tox.ini
 ```
 
 ### Pre-requisites
