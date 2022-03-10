@@ -99,7 +99,9 @@ class Cluster:
             "writting configs into the " +
             deployfile +
             "file")
-        with open('resources/configs/' + str(deployfile), 'w') as cluster_config_file:
+        with open(
+            'resources/configs/' + 
+            str(deployfile), 'w') as cluster_config_file:
             json.dump(fileparams, cluster_config_file)
 
     def deploy_cluster(self, clusterconf):
@@ -112,15 +114,17 @@ class Cluster:
 
         if clusterconf["high_availability_mode"] == 'None':
             LOG.info(
-                "Installing a SNO cluster, high_availability_mode set to: " +
+                "Installing a SNO cluster, \
+                    high_availability_mode set to: " +
                 clusterconf["high_availability_mode"])
         elif clusterconf["high_availability_mode"] == 'Full':
             LOG.info(
-                "Installing a Multi node cluster, high_availability_mode set to: " +
+                "Installing a Multi node cluster, \
+                    high_availability_mode set to: " +
                 clusterconf["high_availability_mode"])
 
         with open(data, 'rb') as payload:
-            cluster_api_call = requests.post(api_url, data=payload, headers=headers)
+            requests.post(api_url, data=payload, headers=headers)
 
         cluster_json_api = json.loads(requests.get(api_url).text)
         existing_deployments = len(cluster_json_api)
@@ -129,7 +133,9 @@ class Cluster:
             cluster_id = cluster_json['id']
             cluster_creation_time = cluster_json['created_at']
             cluster_id_dict[cluster_id] = cluster_creation_time
-        ordered_cluster_id = sort_dict_by_creation_date(cluster_id_dict, "%Y-%m-%dT%H:%M:%S.%fZ")
+        ordered_cluster_id = sort_dict_by_creation_date(
+            cluster_id_dict,
+            "%Y-%m-%dT%H:%M:%S.%fZ")
         cluster_id = list(ordered_cluster_id.keys())[0]
         created_at = list(ordered_cluster_id.values())[0]
 
@@ -149,7 +155,7 @@ class Cluster:
         infraenv_id_dict = {}
 
         with open(data, 'rb') as payload:
-            infraenv_api_call = requests.post(api_url, data=payload, headers=headers)
+            requests.post(api_url, data=payload, headers=headers)
 
         infraenv_json_api = json.loads(requests.get(api_url).text)
         existing_infraenvs = len(infraenv_json_api)
@@ -158,7 +164,9 @@ class Cluster:
             infraenv_id = infraenv_json['id']
             infraenv_creation_time = infraenv_json['created_at']
             infraenv_id_dict[infraenv_id] = infraenv_creation_time
-        ordered_infraenv_id = sort_dict_by_creation_date(infraenv_id_dict, "%Y-%m-%dT%H:%M:%S.%fZ")
+        ordered_infraenv_id = sort_dict_by_creation_date(
+            infraenv_id_dict,
+            "%Y-%m-%dT%H:%M:%S.%fZ")
         infraenv_id = list(ordered_infraenv_id.keys())[0]
         created_at = list(ordered_infraenv_id.values())[0]
 
@@ -220,7 +228,8 @@ class Cluster:
             for master in range(num_masters):
                 get_host_status = 'Not checked yet'
                 while get_host_status != "Host is ready to be installed":
-                    get_host_status_json_api = json.loads(requests.get(api_url).text)
+                    get_host_status_json_api = json.loads(
+                        requests.get(api_url).text)
                     get_host_status_json = get_host_status_json_api[master]
                     master_id = get_host_status_json['id']
                     LOG.info(
@@ -233,7 +242,8 @@ class Cluster:
         elif num_masters == 1:
             get_host_status = 'Not checked yet'
             while get_host_status != "Host is ready to be installed":
-                get_host_status_json_api = json.loads(requests.get(api_url).text)
+                get_host_status_json_api = json.loads(
+                    requests.get(api_url).text)
                 get_host_status_json = get_host_status_json_api[0]
                 master_id = get_host_status_json['id']
                 LOG.info(
@@ -248,7 +258,6 @@ class Cluster:
                 str(num_masters) +
                 " servers to install, it is not a valid value")
             exit(2)
-
 
     def upload_manifests(self, cluster_id):
         api_url = build_api_url_string(
@@ -272,11 +281,17 @@ class Cluster:
                     data = manifest_file.read()
                     encoded = base64.b64encode(data)
                     encodedtext = encoded.decode('utf-8')
-                    split_name = file.split("/",2)
+                    split_name = file.split("/", 2)
                     manifest_name = split_name[2]
-                    data = '{"folder": "openshift","file_name":"' + manifest_name + '","content":"' + encodedtext + '"}'
-                    upload_manifest_api_call = requests.post(api_url, data=data, headers=headers)
-        get_manifests_json_api = json.loads(requests.get(api_url).text)
+                    data = '{"folder": "openshift","file_name":"' \
+                        + manifest_name + \
+                            '","content":"' + encodedtext + '"}'
+                    upload_manifest_api_call = requests.post(
+                        api_url,
+                        data=data,
+                        headers=headers)
+        get_manifests_json_api = json.loads(
+            requests.get(api_url).text)
         num_manifests = len(get_manifests_json_api)
         LOG.info("These are the manifests will be deployed with OpenShift:\n")
         for deployed_manifest in range(num_manifests):
