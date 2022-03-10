@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
-import os
-import getopt
-import sys
-import yaml
-import json
-import requests
-import wget
-import socket
-import time
 import base64
+import getopt
+import json
 import logging
+import os
+import requests
+import socket
+import sys
+import time
+import wget
+import yaml
+
 from collections import OrderedDict
 from datetime import datetime
 
