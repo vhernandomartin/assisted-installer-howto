@@ -604,7 +604,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hf:", ["help", "file="])
         if not opts:
-            LOG.eror("No options provided")
+            LOG.error("No options provided")
             help_menu()
             sys.exit(1)
     except getopt.GetoptError as err:
