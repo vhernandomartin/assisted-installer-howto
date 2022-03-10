@@ -89,13 +89,12 @@ class Cluster:
 
     def insert_params(self, fileparams):
         deployfile = self.deployfile
-        LOG.info("writting configs into the" + deployfile + "file")
+        LOG.info("writting configs into the " + deployfile + "file")
         with open('resources/configs/' + str(deployfile), 'w') as cluster_config_file:
             json.dump(fileparams, cluster_config_file)
 
     def deploy_cluster(self, clusterconf):
-        deployfile = self.deployfile
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/clusters")
         cluster_id_dict = {}
 
         if clusterconf["high_availability_mode"] == 'None':
@@ -117,16 +116,11 @@ class Cluster:
         cluster_id = list(ordered_cluster_id.keys())[0]
         created_at = list(ordered_cluster_id.values())[0]
 
-        #new_deployment = existing_deployments - 1
-        #print(new_deployment)
-        #cluster_json = cluster_json_api[new_deployment]
-        #cluster_id = cluster_json['id']
         LOG.info("Cluster deployed with cluster_id: " + cluster_id + ' , created at: ' + created_at)
         return cluster_id
 
     def deploy_infraEnv(self):
-        deployfile = self.deployfile
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/infra-envs'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/infra-envs")
         infraenv_id_dict = {}
 
         with open(data, 'rb') as payload:
@@ -143,14 +137,12 @@ class Cluster:
         infraenv_id = list(ordered_infraenv_id.keys())[0]
         created_at = list(ordered_infraenv_id.values())[0]
 
-        #new_infraenv = existing_infraenvs -1
-        #infraenv_json = infraenv_json_api[new_infraenv]
-        #infraenv_id = infraenv_json['id']
         LOG.info("InfraEnv deployed with infraenv_id: " + infraenv_id + ' , created at: ' + created_at)
         return infraenv_id
 
     def get_iso(self, infraenv_id):
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/infra-envs/' + infraenv_id + '/downloads/image-url'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/infra-envs/" + infraenv_id + "/downloads/image-url")
+        print(api_url)
 
         get_iso_json_api = json.loads(requests.get(api_url).text)
         get_iso = get_iso_json_api['url']
@@ -163,12 +155,12 @@ class Cluster:
             LOG.info("The cluster status is: " + get_clusterstatus + " , cluster_id: " + cluster_id)
             LOG.info("Waiting for: " + status_message)
             time.sleep(30)
-            api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id
+            api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/clusters/" + cluster_id)
             get_clusterstatus_json_api = json.loads(requests.get(api_url).text)
             get_clusterstatus = get_clusterstatus_json_api['status_info']
 
     def get_infra_hosts_status(self, infraenv_id, num_masters):
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/infra-envs/' + infraenv_id + '/hosts'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/infra-envs/" + infraenv_id + "/hosts")
         while len(json.loads(requests.get(api_url).text)) == 0:
             LOG.info("Waiting for hosts to be registered")
             time.sleep(30)
@@ -197,14 +189,13 @@ class Cluster:
 
 
     def upload_manifests(self, cluster_id):
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/manifests'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/clusters/" + cluster_id + "/manifests")
         headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
         path = 'resources/manifests'
         for manifest in os.listdir(path):
             file = os.path.join(path, manifest)
             if os.path.isfile(file):
                 LOG.info("Adding new manifest: " + file)
-                #print('INFO: Adding new manifest: ' + file)
                 with open(file, 'rb') as manifest_file:
                     data = manifest_file.read()
                     encoded = base64.b64encode(data)
@@ -223,23 +214,23 @@ class Cluster:
     def patch_cluster_config(self, cluster_id, api_vip, num_masters):
         if num_masters > 1:
             data = '{ "api_vip": "' + api_vip + '"}'
-            api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id
+            api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/clusters/" + cluster_id)
             headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
             requests.patch(api_url, data=data, headers=headers)
 
     def patch_install_config(self, cluster_id):
         data = 'resources/configs/install-config-patch'
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/install-config'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/clusters/" + cluster_id + "/install-config")
         headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
         with open(data, 'rb') as payload:
             infraenv_api_call = requests.patch(api_url, data=payload, headers=headers)
 
     def install_cluster(self, cluster_id):
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/actions/install'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/clusters/" + cluster_id + "/actions/install")
         requests.post(api_url)
 
     def finish_installation(self, cluster_id):
-        api_url = 'http://'+ str(hostname) + ':8090/api/assisted-install/v2/clusters/' + cluster_id + '/actions/complete-installation'
+        api_url = build_api_url_string("http", hostname, "8090", "/api/assisted-install/v2/clusters/" + cluster_id + "/actions/complete-installation")
         headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
         data = '{"is_success":true}'
         requests.post(api_url, data=data, headers=headers)
@@ -264,9 +255,9 @@ class Redfish:
         )
 
     def insert_virtual_media(self):
-        iso_path = 'http://' + str(self.ip) + '/ocp_ai.iso'
-        api_url = 'https://'+ str(self.bmc_ip) + self.bmc_insertmedia_path
-        api_url2 = 'https://'+ str(self.bmc_ip) + self.bmc_system_path
+        iso_path = build_api_url_string("http", self.ip, "80", "/ocp_ai.iso")
+        api_url = build_api_url_string("https", self.bmc_ip, "443", self.bmc_insertmedia_path)
+        api_url2 = build_api_url_string("https", self.bmc_ip, "443", self.bmc_system_path)
         headers = {'Content-Type': 'application/json'}
         data = '{"Image": "'+ iso_path +'", "Inserted": true}'
         data2 = '{"Boot": {"BootSourceOverrideTarget": "Cd", "BootSourceOverrideMode": "UEFI", "BootSourceOverrideEnabled": "Once"}}'
@@ -279,8 +270,8 @@ class Redfish:
         return insert_iso, set_insert_iso
 
     def eject_virtual_media(self):
-        iso_path = 'http://' + str(self.hostname) + '/ocp_ai.iso'
-        api_url = 'https://'+ str(self.bmc_ip) + self.bmc_ejectmedia_path
+        iso_path = build_api_url_string("http", self.hostname, "80", "/ocp_ai.iso")
+        api_url = build_api_url_string("https", self.bmc_ip, "443", self.bmc_ejectmedia_path)
         headers = {'Content-Type': 'application/json'}
         data = '{}'
 
@@ -290,7 +281,7 @@ class Redfish:
         return eject_iso
 
     def power_on(self):
-        api_url = 'https://'+ str(self.bmc_ip) + self.bmc_resetsystem_path
+        api_url = build_api_url_string("https", self.bmc_ip, "443", self.bmc_resetsystem_path)
         headers = {'Content-Type': 'application/json'}
         data = '{"ResetType": "On"}'
 
@@ -299,9 +290,10 @@ class Redfish:
         return poweron_system
 
     def power_off(self):
-        api_url = 'https://'+ str(self.bmc_ip) + self.bmc_resetsystem_path
+        api_url = build_api_url_string("https", self.bmc_ip, "443", self.bmc_resetsystem_path)
         headers = {'Content-Type': 'application/json'}
         data = '{"ResetType": "ForceOff"}'
+        print(api_url)
 
         LOG.info("Shutting down the server: " + str(self.bmc_ip))
         poweroff_system = requests.post(api_url, data=data, headers=headers, verify=False, auth=(self.bmc_user, self.bmc_password))
@@ -309,7 +301,7 @@ class Redfish:
         return poweroff_system
 
     def force_restart(self):
-        api_url = 'https://'+ str(self.bmc_ip) + self.bmc_resetsystem_path
+        api_url = build_api_url_string("https", self.bmc_ip, "443", self.bmc_resetsystem_path)
         headers = {'Content-Type': 'application/json'}
         data = {'ResetType': 'ForceRestart'}
 
@@ -347,6 +339,10 @@ def sort_dict_by_creation_date(dict_data, date_format):
     ordered_data = OrderedDict(reversed(sorted(dict_data.items(), key=lambda x: datetime.strptime(x[1], date_format))))
     return ordered_data
 
+def build_api_url_string(protocol, hostname, port, path):
+    api_url = protocol + '://'+ str(hostname) + ':' + port + path
+    return api_url
+
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hf:", ["help", "file="])
@@ -370,16 +366,16 @@ def main():
             file = arg
 
             ocpinfraconf = Cluster(file,"ocp_infra_configs","cluster.json")
-            getocpinfraconf = ocpinfraconf.get_params()
+            ocpinfraconf.get_params()
 
             clusterconf = Cluster(file,"cluster_configs","cluster.json")
             getclusterconf = clusterconf.get_params()
-            insertclusterconf = clusterconf.insert_params(getclusterconf)
+            clusterconf.insert_params(getclusterconf)
             cluster_id = clusterconf.deploy_cluster(getclusterconf)
 
             infraconf = Cluster(file,"infraenv_configs","infraenv.json",cluster_id)
             getinfraconf = infraconf.get_params()
-            insertinfraconf = infraconf.insert_params(getinfraconf)
+            infraconf.insert_params(getinfraconf)
             infraenv_id = infraconf.deploy_infraEnv()
             infraconf.get_iso(infraenv_id)
 

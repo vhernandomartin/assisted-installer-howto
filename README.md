@@ -42,9 +42,13 @@ tree
 
 ### Pre-requisites
 
+This tool has been designed to run on the same host where the Assisted Installer is deployed.
+
 First of all it is necessary to create a `paramfile.yaml` file based on your preferences, settings will vary between a SNO and a multi-node cluster, you can make a copy from either `paramfile-3masters.yaml` or `paramfile-sno.yaml` files to your own `paramfile.yaml` and customize it afterwards based on your own preferences. Check the next section *paramfile settings* for further references on the settings included.
 
 Once the `paramfile.yaml` file is ready, create your own `install-config-patch` file, you can create a copy from one of the `install-config-patch-*` files available in the repo.
+
+Be aware of some of the paremeters in the paramfile.yaml like the *pull_secret*, *ignition_config_override*, or *static_network_config*, those parameters has something in common, those needs to either escape " characters using a backward slash character \" or separate lines with /n. Those are mandatory conditions in these parameters and must be properly set otherwise the Assisted Installer API call will fail returning an error.
 
 The manifests folder includes some of the custom manifests we may need to include in the OpenShift cluster at installation time, set any of these manifests accordingly (internal registry names are required) and place new manifests if you consider it necessary.
 
