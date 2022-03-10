@@ -19,13 +19,13 @@ from datetime import datetime
 logging.basicConfig()
 LOG = logging.getLogger(__name__)
 
+
 class Cluster:
     def __init__(self, file, params, deployfile, cluster_id='null'):
         self.file = file
         self.params = params
         self.cluster_id = cluster_id
         self.deployfile = deployfile
-
         LOG.setLevel(logging.INFO)
         LOG.warning("Suppressing requests library SSL Warnings")
         requests.packages.urllib3.disable_warnings(
@@ -58,7 +58,9 @@ class Cluster:
         data = 'resources/configs/' + str(deployfile)
         clusterid_string = 'cluster_id'
         if clusterid_string in open(file, 'r').read():
-            LOG.info("cluster_id parameter already set in the paramfile.yaml, please remove it before running this program")
+            LOG.info(
+                "cluster_id parameter already set in the paramfile.yaml, \
+                    please remove it before running this program")
             exit(1)
 
         with open(file, 'a') as param_file:
