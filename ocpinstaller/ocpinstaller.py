@@ -287,7 +287,7 @@ class Cluster:
                     data = '{"folder": "openshift","file_name":"' \
                         + manifest_name + \
                         '","content":"' + encodedtext + '"}'
-                    upload_manifest_api_call = requests.post(
+                    requests.post(
                         api_url,
                         data=data,
                         headers=headers)
@@ -326,7 +326,10 @@ class Cluster:
             'Content-Type': 'application/json',
             'accept': 'application/json'}
         with open(data, 'rb') as payload:
-            infraenv_api_call = requests.patch(api_url, data=payload, headers=headers)
+            requests.patch(
+                api_url,
+                data=payload,
+                headers=headers)
 
     def install_cluster(self, cluster_id):
         api_url = build_api_url_string(
@@ -398,7 +401,7 @@ class Redfish:
             "443",
             self.bmc_system_path)
         headers = {'Content-Type': 'application/json'}
-        data = '{"Image": "'+ iso_path +'", "Inserted": true}'
+        data = '{"Image": "' + iso_path + '", "Inserted": true}'
         data2 = '{"Boot": {"BootSourceOverrideTarget": "Cd", "BootSourceOverrideMode": "UEFI", "BootSourceOverrideEnabled": "Once"}}'
 
         LOG.info(
@@ -425,11 +428,6 @@ class Redfish:
         return insert_iso, set_insert_iso
 
     def eject_virtual_media(self):
-        iso_path = build_api_url_string(
-            "http",
-            self.hostname,
-            "80",
-            "/ocp_ai.iso")
         api_url = build_api_url_string(
             "https",
             self.bmc_ip,
@@ -439,7 +437,7 @@ class Redfish:
         data = '{}'
 
         LOG.info(
-            "Ejecting any iso image as a virtualmedia device for server: " + 
+            "Ejecting any iso image as a virtualmedia device for server: " +
             self.bmc_ip)
         eject_iso = requests.post(
             api_url,
@@ -520,8 +518,10 @@ class Redfish:
                 self.bmc_password))
         return reset_system
 
+
 def help_menu():
     LOG.info("Usage: " + sys.argv[0] + " -f <PARAMETERS_FILE>")
+
 
 def redfish_launcher(
         num_masters,
@@ -532,10 +532,12 @@ def redfish_launcher(
         bmc_ejectmedia_path,
         bmc_resetsystem_path,
         bmc_system_path,
-        hostname,ip):
+        hostname,
+        ip):
     if num_masters > 1:
         LOG.info(
-            "\nThis is a multi-node installation, it will be required to set VirtualMedia in " + 
+            "\nThis is a multi-node installation, \
+            it will be required to set VirtualMedia in " +
             str(num_masters) +
             "servers")
         for masterip in bmc_ip:
@@ -557,7 +559,8 @@ def redfish_launcher(
 
     elif num_masters == 1:
         LOG.info(
-            "\nThis is a SNO installation, it will be required to set VirtualMedia in " + 
+            "\nThis is a SNO installation, \
+            it will be required to set VirtualMedia in " +
             str(num_masters) +
             "servers")
         bmc_ip = bmc_ip[0]
@@ -569,7 +572,8 @@ def redfish_launcher(
             bmc_ejectmedia_path,
             bmc_resetsystem_path,
             bmc_system_path,
-            hostname,ip)
+            hostname,
+            ip)
         bmc_ops.power_off()
         bmc_ops.eject_virtual_media()
         bmc_ops.insert_virtual_media()
@@ -580,13 +584,21 @@ def redfish_launcher(
             " servers to install, it is not a valid value")
         exit(2)
 
+
 def sort_dict_by_creation_date(dict_data, date_format):
-    ordered_data = OrderedDict(reversed(sorted(dict_data.items(), key=lambda x: datetime.strptime(x[1], date_format))))
+    ordered_data = OrderedDict(
+        reversed(
+            sorted(
+                dict_data.items(),
+                key=lambda x: datetime.strptime(x[1],
+                date_format))))
     return ordered_data
 
+
 def build_api_url_string(protocol, hostname, port, path):
-    api_url = protocol + '://'+ str(hostname) + ':' + port + path
+    api_url = protocol + '://' + str(hostname) + ':' + port + path
     return api_url
+
 
 def main():
     try:
@@ -610,15 +622,25 @@ def main():
         elif opt in ("-f", "--file"):
             file = arg
 
-            ocpinfraconf = Cluster(file, "ocp_infra_configs", "cluster.json")
+            ocpinfraconf = Cluster(
+                file,
+                "ocp_infra_configs",
+                "cluster.json")
             ocpinfraconf.get_params()
 
-            clusterconf = Cluster(file, "cluster_configs", "cluster.json")
+            clusterconf = Cluster(
+                file,
+                "cluster_configs",
+                "cluster.json")
             getclusterconf = clusterconf.get_params()
             clusterconf.insert_params(getclusterconf)
             cluster_id = clusterconf.deploy_cluster(getclusterconf)
 
-            infraconf = Cluster(file, "infraenv_configs", "infraenv.json", cluster_id)
+            infraconf = Cluster(
+                file,
+                "infraenv_configs",
+                "infraenv.json",
+                cluster_id)
             getinfraconf = infraconf.get_params()
             infraconf.insert_params(getinfraconf)
             infraenv_id = infraconf.deploy_infraEnv()
@@ -636,18 +658,22 @@ def main():
                 hostname,
                 ip)
             infraconf.get_infra_hosts_status(infraenv_id, num_masters)
-            clusterconf.patch_cluster_config(cluster_id, api_vip,num_masters)
-            clusterconf.get_cluster_status(cluster_id, "Cluster ready to be installed")
+            clusterconf.patch_cluster_config(cluster_id, api_vip, num_masters)
+            clusterconf.get_cluster_status(
+                cluster_id,
+                "Cluster ready to be installed")
 
             clusterconf.patch_install_config(cluster_id)
             clusterconf.upload_manifests(cluster_id)
             clusterconf.install_cluster(cluster_id)
 
-            clusterconf.get_cluster_status(cluster_id, "Cluster is installed")
+            clusterconf.get_cluster_status(
+                cluster_id,
+                "Cluster is installed")
             clusterconf.finish_installation(cluster_id)
 
 
 ## MAIN ##
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
 ## END MAIN ##
