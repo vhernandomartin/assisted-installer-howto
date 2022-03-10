@@ -52,6 +52,10 @@ This tool has been designed to run on the same host where the Assisted Installer
 
 If you are planning to use DHCP to provide IPs, this must be available on the network, DNS is mandatory and needs to be available on the network ready to answer DNS requests. Servers, API and Ingress VIPs names must be already set in the DNS, the installation will check for those names as a prerequisite in a installation preparation phase.
 
+For disconnected installations a registry must be deployed and available in your network, the images required to deploy OpenShift and any operator you may need must be already mirrored in that registry.
+
+An HTTPD server is required to store and serve the images needed to boot and install the OpenShift nodes.
+
 First of all it is necessary to create a `paramfile.yaml` file based on your preferences, settings will vary between a SNO and a multi-node cluster, you can make a copy from either `paramfile-3masters.yaml` or `paramfile-sno.yaml` files to your own `paramfile.yaml` and customize it afterwards based on your own preferences. Check the next section *paramfile settings* for further references on the settings included.
 
 Once the `paramfile.yaml` file is ready, create your own `install-config-patch` file, you can create a copy from one of the `install-config-patch-*` files available in the repo.
