@@ -286,7 +286,7 @@ class Cluster:
                     manifest_name = split_name[2]
                     data = '{"folder": "openshift","file_name":"' \
                         + manifest_name + \
-                            '","content":"' + encodedtext + '"}'
+                        '","content":"' + encodedtext + '"}'
                     upload_manifest_api_call = requests.post(
                         api_url,
                         data=data,
