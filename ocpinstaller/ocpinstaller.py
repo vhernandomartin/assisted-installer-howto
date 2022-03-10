@@ -100,8 +100,9 @@ class Cluster:
             deployfile +
             "file")
         with open(
-            'resources/configs/' + 
-            str(deployfile), 'w') as cluster_config_file:
+            'resources/configs/' +
+            str(deployfile),
+            'w') as cluster_config_file:
             json.dump(fileparams, cluster_config_file)
 
     def deploy_cluster(self, clusterconf):
